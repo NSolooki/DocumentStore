@@ -1,9 +1,8 @@
 #
 ---
-Title: |
-    Data Structures Semester Project, Spring 2021: Document Store and Search
-    Engine.
+Data Structures Semester Project, Spring 2021: Document Store and Search Engine.
 ---
+========================
 
 How to Use This Document
 ========================
