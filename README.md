@@ -2,33 +2,6 @@
 Yeshiva University Data Structures Semester Project, Spring 2021: Document Store and Search Engine.
 ===================================================================================================
 
-How to Use This Document
-========================
-
-1)  The first time you are reading this, you should:
-
-    a.  make sure there are no distractions -- turn your phone off, turn
-        off all notifications on your laptop.
-
-    b.  read everything that comes before "Stage \#1", as well as the
-        "Stage \#1" section. As you read, take notes on any questions
-        you have. Also look ahead at the due dates of stages 2
-        through 5.
-
-    c.  If you have questions about any of the technologies or libraries
-        this project requires, follow the links in this document to read
-        more about them
-
-    d.  If after reading up on them you still have questions, feel free
-        to post questions to Piazza
-
-2)  As you work on the project, be sure to refer back to this document
-    to double check requirements as you go.
-
-3)  If new versions of the document are created in response to Piazza
-    questions etc., make sure to download the updated version and use
-    that as your reference.
-
 Introduction to the Project
 ===========================
 
