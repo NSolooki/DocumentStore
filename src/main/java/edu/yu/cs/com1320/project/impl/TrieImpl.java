@@ -193,52 +193,53 @@ public class TrieImpl<Value> implements Trie<Value> {
     }
 
     /**
-     * Delete the subtree rooted at the last character of the prefix.
-     * Search is CASE INSENSITIVE.
-     * @param prefix
-     * @return a Set of all Values that were deleted; an empty set if an empty string was passed
+     * Remove the given value from the node of the given key (do not remove the value from other nodes in the Trie)
+     * @param key
+     * @param val
+     * @return the value which was deleted. If the key did not contain the given value, return null.
      */
     @Override
-    public Set<Value> deleteAllWithPrefix (String prefix) {
-        if (prefix == null) {
-            throw new IllegalArgumentException ("Prefix must not be null.");
+    public Value delete (String key, Value val) {
+        if (key == null || val == null) {
+            throw new IllegalArgumentException ("Argument must not be null.");
         }
-        Set<Value> deletions = new HashSet<>();
-        if (prefix.isEmpty()) {
-            return deletions;
+        Node<Value> deletionNode = this.get(this.root, key, 0);
+        if (deletionNode == null) {
+            return null;
         }
-        this.root = this.deleteAllWithPrefix(this.root, prefix, 0, deletions);
-        return deletions;
+        Value deletion = deletionNode.values.contains(val) ? deletionNode.values.get(deletionNode.values.indexOf(val)) : null;
+        if (deletion == null) {
+            return null;
+        }
+        this.root = this.delete(this.root, key, val, 0);
+        return deletion;
     }
 
     /**
-     * Delete the subtree rooted at the last character of the prefix (private).
+     * Remove the given value from the node of the given key (private).
      * @param n current node
-     * @param prefix
+     * @param key 
+     * @param val
      * @param d current depth
-     * @param deletions current set of deleted values
      * @return if the node is still relevant - the node; if no longer relevant - null
      */
-    private Node<Value> deleteAllWithPrefix (Node<Value> n, String prefix, int d, Set<Value> deletions) {
+    private Node<Value> delete (Node<Value> n, String key, Value val, int d) {
         if (n == null) {
             return null;
         }
-        if (d == prefix.length()) {
-            deletions.addAll(getAllWithPrefix(prefix));
-            n = null;
+        if (d == key.length()) {
+            n.values.remove(val);
         }
         else {
-            int index = indexFunction(prefix.charAt(d));
-            n.links[index] = this.deleteAllWithPrefix(n.links[index], prefix, d+1, deletions);       
+            int index = indexFunction(key.charAt(d));
+            n.links[index] = this.delete(n.links[index], key, val, d+1);       
         }
-        if (n != null) {
-            if (n.values != null || !n.values.isEmpty()) {
+        if (n.values != null || !n.values.isEmpty()) {
+            return n;
+        }
+        for (Node<Value> link : n.links) {
+            if (link != null) {
                 return n;
-            }
-            for (Node<Value> link : n.links) {
-                if (link != null) {
-                    return n;
-                }
             }
         }
         return null;
@@ -294,53 +295,52 @@ public class TrieImpl<Value> implements Trie<Value> {
     }
 
     /**
-     * Remove the given value from the node of the given key (do not remove the value from other nodes in the Trie)
-     * @param key
-     * @param val
-     * @return the value which was deleted. If the key did not contain the given value, return null.
+     * Delete the subtree rooted at the last character of the prefix.
+     * Search is CASE INSENSITIVE.
+     * @param prefix
+     * @return a Set of all Values that were deleted; an empty set if an empty string was passed
      */
     @Override
-    public Value delete (String key, Value val) {
-        if (key == null || val == null) {
-            throw new IllegalArgumentException ("Argument must not be null.");
+    public Set<Value> deleteAllWithPrefix (String prefix) {
+        if (prefix == null) {
+            throw new IllegalArgumentException ("Prefix must not be null.");
         }
-        Node<Value> deletionNode = this.get(this.root, key, 0);
-        if (deletionNode == null) {
-            return null;
+        Set<Value> deletions = new HashSet<>();
+        if (prefix.isEmpty()) {
+            return deletions;
         }
-        Value deletion = deletionNode.values.contains(val) ? deletionNode.values.get(deletionNode.values.indexOf(val)) : null;
-        if (deletion == null) {
-            return null;
-        }
-        this.root = this.delete(this.root, key, val, 0);
-        return deletion;
+        this.root = this.deleteAllWithPrefix(this.root, prefix, 0, deletions);
+        return deletions;
     }
 
     /**
-     * Remove the given value from the node of the given key (private).
+     * Delete the subtree rooted at the last character of the prefix (private).
      * @param n current node
-     * @param key 
-     * @param val
+     * @param prefix
      * @param d current depth
+     * @param deletions current set of deleted values
      * @return if the node is still relevant - the node; if no longer relevant - null
      */
-    private Node<Value> delete (Node<Value> n, String key, Value val, int d) {
+    private Node<Value> deleteAllWithPrefix (Node<Value> n, String prefix, int d, Set<Value> deletions) {
         if (n == null) {
             return null;
         }
-        if (d == key.length()) {
-            n.values.remove(val);
+        if (d == prefix.length()) {
+            deletions.addAll(getAllWithPrefix(prefix));
+            n = null;
         }
         else {
-            int index = indexFunction(key.charAt(d));
-            n.links[index] = this.delete(n.links[index], key, val, d+1);       
+            int index = indexFunction(prefix.charAt(d));
+            n.links[index] = this.deleteAllWithPrefix(n.links[index], prefix, d+1, deletions);       
         }
-        if (n.values != null || !n.values.isEmpty()) {
-            return n;
-        }
-        for (Node<Value> link : n.links) {
-            if (link != null) {
+        if (n != null) {
+            if (n.values != null || !n.values.isEmpty()) {
                 return n;
+            }
+            for (Node<Value> link : n.links) {
+                if (link != null) {
+                    return n;
+                }
             }
         }
         return null;

@@ -58,7 +58,7 @@ public class CommandSet<Target> extends AbstractSet<GenericCommand<Target>> impl
      * @return true if all were undone; false otherwise
      */
     @Override
-    public boolean undo() {
+    public boolean undo () {
         int size = this.genericCommands.size();
         return this.undoAll().size() == size;
     }

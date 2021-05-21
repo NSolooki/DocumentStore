@@ -37,12 +37,12 @@ public interface Trie<Value> {
     List<Value> getAllWithPrefixSorted (String prefix, Comparator<Value> comparator);
 
     /**
-     * Delete the subtree rooted at the last character of the prefix.
-     * Search is CASE INSENSITIVE.
-     * @param prefix
-     * @return a Set of all Values that were deleted.
+     * Remove the given value from the node of the given key (do not remove the value from other nodes in the Trie)
+     * @param key
+     * @param val
+     * @return the value which was deleted. If the key did not contain the given value, return null.
      */
-    Set<Value> deleteAllWithPrefix (String prefix);
+    Value delete (String key, Value val);
 
     /**
      * Delete all values from the node of the given key (do not remove the values from other nodes in the Trie)
@@ -50,12 +50,12 @@ public interface Trie<Value> {
      * @return a Set of all Values that were deleted.
      */
     Set<Value> deleteAll (String key);
-
+    
     /**
-     * Remove the given value from the node of the given key (do not remove the value from other nodes in the Trie)
-     * @param key
-     * @param val
-     * @return the value which was deleted. If the key did not contain the given value, return null.
+     * Delete the subtree rooted at the last character of the prefix.
+     * Search is CASE INSENSITIVE.
+     * @param prefix
+     * @return a Set of all Values that were deleted.
      */
-    Value delete (String key, Value val);
+    Set<Value> deleteAllWithPrefix (String prefix);
 }

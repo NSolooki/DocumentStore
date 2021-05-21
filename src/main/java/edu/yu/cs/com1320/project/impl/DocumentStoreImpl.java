@@ -33,6 +33,9 @@ public class DocumentStoreImpl implements DocumentStore {
     private Integer maxDocumentBytes;
     private File dir;
 
+    /**
+     * Class for linking a URI with its respective last use time (LUT).
+     */
     private final class LUT implements Comparable<LUT> {
 
         private URI uri;
@@ -138,6 +141,28 @@ public class DocumentStoreImpl implements DocumentStore {
     }
 
     /**
+     * Creates a DocumentImpl and adds it to the Trie
+     * @param content byte[] with the content to create the document
+     * @param uri uri of the document
+     * @param format format of the document
+     * @return the DocumentImpl that was created
+     */
+    private DocumentImpl createDocument (byte[] content, URI uri, DocumentFormat format) {
+        DocumentImpl doc;
+        if (format == DocumentFormat.TXT) {
+            String text = new String(content);
+            doc = new DocumentImpl(uri, text);
+        }
+        else {
+            doc = new DocumentImpl(uri, content);
+        }
+        for (String word : doc.getWords()) {
+            this.trie.put(word, doc.getKey());
+        }
+        return doc;
+    }
+
+    /**
      * @param uri the unique identifier of the Document to get
      * @return the given Document
      */
@@ -182,28 +207,6 @@ public class DocumentStoreImpl implements DocumentStore {
     }
 
     /**
-     * Creates a DocumentImpl and adds it to the Trie
-     * @param content byte[] with the content to create the document
-     * @param uri uri of the document
-     * @param format format of the document
-     * @return the DocumentImpl that was created
-     */
-    private DocumentImpl createDocument (byte[] content, URI uri, DocumentFormat format) {
-        DocumentImpl doc;
-        if (format == DocumentFormat.TXT) {
-            String text = new String(content);
-            doc = new DocumentImpl(uri, text);
-        }
-        else {
-            doc = new DocumentImpl(uri, content);
-        }
-        for (String word : doc.getWords()) {
-            this.trie.put(word, doc.getKey());
-        }
-        return doc;
-    }
-
-    /**
      * Removes the Document from the Trie, Heap, documentCount/Bytes (usage), and BTree.
      * @param doc
      * @return deleted Document
@@ -214,181 +217,6 @@ public class DocumentStoreImpl implements DocumentStore {
         }
         this.removeFromHeapAndUsage(doc);
         return this.storage.put(doc.getKey(), null);
-}
-
-    /**
-     * Undoes the last put or delete command
-     * @throws IllegalStateException if there are no actions to be undone, i.e. the commandStack is empty
-     */
-    @Override
-    public void undo () throws IllegalStateException {
-        if (this.commandStack.peek() == null) {
-            throw new IllegalStateException("There is no command in the commandStack to be undone.");
-        }
-        this.commandStack.pop().undo();
-    }
-
-    /**
-     * Undoes the last put or delete that was done with the given URI as its key
-     * @param uri
-     * @throws IllegalStateException if there are no actions on the commandStack for the given URI
-     */
-    @Override
-    public void undo (URI uri) throws IllegalStateException {
-        if (uri == null) {
-            throw new IllegalArgumentException("URI must not be null.");
-        }
-        if (this.commandStack.peek() == null) {
-            throw new IllegalStateException("There is no command in the commandStack to be undone.");
-        }
-        StackImpl<Undoable> tempStack = new StackImpl<>();
-        Undoable current = null;
-        int commandStackSize = this.commandStack.size();
-        boolean containsUri = false;
-        for (int i = 0; i < commandStackSize; i++) {
-            current = this.commandStack.pop();
-            if (((current instanceof GenericCommand) && ((GenericCommand<URI>)current).getTarget().equals(uri)) || ((current instanceof CommandSet) && ((CommandSet<URI>)current).containsTarget(uri))) {
-                containsUri = true;
-                break;
-            }
-            tempStack.push(current);
-        }
-        int tempStackSize = tempStack.size();
-        for (int i = 0; i < tempStackSize; i++) {
-            this.commandStack.push(tempStack.pop());
-        }
-        if (current == null || !containsUri) {
-            throw new IllegalStateException("There is no command with this URI to be undone.");
-        }
-        this.undo(uri, current);
-    }
-    
-    /**
-     * Undoes the command with this uri
-     * @param uri
-     * @param command
-     */
-    private void undo (URI uri, Undoable command) {
-        if (command instanceof GenericCommand) {
-            ((GenericCommand<URI>)command).undo();
-        }
-        else {
-            ((CommandSet<URI>)command).undo(uri);
-            if (!((CommandSet<URI>)command).isEmpty()) {
-                this.commandStack.push(command);
-            }
-        }
-    }
-
-    /**
-     * Retrieve all Documents whose text contains the given keyword.
-     * Documents are returned in sorted, descending order, sorted by the number of times the keyword appears in the document.
-     * Search is CASE INSENSITIVE.
-     * @param keyword
-     * @return a List of the matches. If there are no matches, return an empty list.
-     */
-    @Override
-    public List<Document> search (String keyword) {
-        if (keyword == null) {
-            throw new IllegalArgumentException("Keyword must not be null.");
-        }
-        List<Document> matches = new ArrayList<>();
-        keyword = this.stringFormatter(keyword);
-        long currentUseTime = System.nanoTime();
-        for (URI uri : trie.getAllSorted(keyword, this.createComparator(keyword))) {
-            DocumentImpl doc;
-            File file = new File(dir, (uri.getAuthority() + uri.getPath() + ".json"));
-            if (file.exists()) {
-                doc = this.storage.get(uri);
-                this.addToHeapAndUsage(doc, currentUseTime);
-            }
-            else {
-                doc = this.storage.get(uri);
-                doc.setLastUseTime(currentUseTime);
-                this.heap.reHeapify(new LUT(uri));
-            }
-            matches.add(doc);
-        }
-        return matches;
-    }
-
-    /**
-     * Retrieve all Documents whose text starts with the given prefix
-     * Documents are returned in sorted, descending order, sorted by the number of times the prefix appears in the document.
-     * Search is CASE INSENSITIVE.
-     * @param keywordPrefix
-     * @return a List of the matches. If there are no matches, return an empty list.
-     */
-    @Override
-    public List<Document> searchByPrefix (String keywordPrefix) {
-        if (keywordPrefix == null) {
-            throw new IllegalArgumentException("Keyword must not be null.");
-        }
-        List<Document> matches = new ArrayList<>();
-        keywordPrefix = this.stringFormatter(keywordPrefix);
-        long currentUseTime = System.nanoTime();
-        for (URI uri : trie.getAllWithPrefixSorted(keywordPrefix, this.createPrefixComparator(keywordPrefix))) {
-            DocumentImpl doc;
-            File file = new File(dir, (uri.getAuthority() + uri.getPath() + ".json"));
-            if (file.exists()) {
-                doc = this.storage.get(uri);
-                this.addToHeapAndUsage(doc, currentUseTime);
-            }
-            else {
-                doc = this.storage.get(uri);
-                doc.setLastUseTime(currentUseTime);
-                this.heap.reHeapify(new LUT(uri));
-            }
-            matches.add(doc);
-        }
-        return matches;
-    }
-
-    /**
-     * Completely remove any trace of any Document which contains the given keyword
-     * @param keyword
-     * @return a Set of URIs of the Documents that were deleted.
-     */
-    @Override
-    public Set<URI> deleteAll (String keyword) {
-        if (keyword == null) {
-            throw new IllegalArgumentException("Keyword must not be null.");
-        }
-        keyword = this.stringFormatter(keyword);
-        Set<URI> deletions = trie.deleteAll(keyword);
-        Set<DocumentImpl> deletedDocs = new HashSet<>();
-        for (URI uri : deletions) {
-            DocumentImpl doc = this.storage.get(uri);
-            deletedDocs.add(doc);
-            this.removeFromHeapAndUsage(doc);
-            this.storage.put(uri, null);
-        }
-        this.addCommandSet(deletedDocs);
-        return deletions;
-    }
-
-    /**
-     * Completely remove any trace of any document which contains a word that has the given prefix
-     * Delete is CASE INSENSITIVE.
-     * @param keywordPrefix
-     * @return a Set of URIs of the documents that were deleted.
-     */
-    @Override
-    public Set<URI> deleteAllWithPrefix (String keywordPrefix) {
-        if (keywordPrefix == null) {
-            throw new IllegalArgumentException("Keyword must not be null.");
-        }
-        keywordPrefix = this.stringFormatter(keywordPrefix);
-        Set<URI> deletions = trie.deleteAllWithPrefix(keywordPrefix);
-        Set<DocumentImpl> deletedDocs = new HashSet<>();
-        for (URI uri : deletions) {
-            DocumentImpl doc = this.storage.get(uri);
-            deletedDocs.add(doc);
-            this.removeFromHeapAndUsage(doc);
-            this.storage.put(uri, null);
-        }
-        this.addCommandSet(deletedDocs);
-        return deletions;
     }
 
     /**
@@ -452,24 +280,99 @@ public class DocumentStoreImpl implements DocumentStore {
     }
 
     /**
-     * Creates a CommandSet and pushes it onto the commandStack
-     * @param docSet documents to be added to the CommandSet
+     * Undoes the last put or delete command
+     * @throws IllegalStateException if there are no actions to be undone, i.e. the commandStack is empty
      */
-    private void addCommandSet (Set<DocumentImpl> docSet) {
-        CommandSet<URI> commandSet = new CommandSet<>();
-        for (DocumentImpl doc : docSet) {
-            Function<URI, Boolean> function = functionUri -> {
-                this.storage.put(functionUri, doc);
-                for (String word : doc.getWords()) {
-                    this.trie.put(word, doc.getKey());
-                }
-                this.addToHeapAndUsage(doc, System.nanoTime());
-                return true;
-            };
-            GenericCommand<URI> command = new GenericCommand<>(doc.getKey(), function);
-            commandSet.addCommand(command);
+    @Override
+    public void undo () throws IllegalStateException {
+        if (this.commandStack.peek() == null) {
+            throw new IllegalStateException("There is no command in the commandStack to be undone.");
         }
-        this.commandStack.push(commandSet);
+        this.commandStack.pop().undo();
+    }
+
+    /**
+     * Undoes the last put or delete that was done with the given URI as its key
+     * @param uri
+     * @throws IllegalStateException if there are no actions on the commandStack for the given URI
+     */
+    @Override
+    public void undo (URI uri) throws IllegalStateException {
+        if (uri == null) {
+            throw new IllegalArgumentException("URI must not be null.");
+        }
+        if (this.commandStack.peek() == null) {
+            throw new IllegalStateException("There is no command in the commandStack to be undone.");
+        }
+        StackImpl<Undoable> tempStack = new StackImpl<>();
+        Undoable current = null;
+        int commandStackSize = this.commandStack.size();
+        boolean containsUri = false;
+        for (int i = 0; i < commandStackSize; i++) {
+            current = this.commandStack.pop();
+            if (((current instanceof GenericCommand) && ((GenericCommand<URI>)current).getTarget().equals(uri)) || ((current instanceof CommandSet) && ((CommandSet<URI>)current).containsTarget(uri))) {
+                containsUri = true;
+                break;
+            }
+            tempStack.push(current);
+        }
+        int tempStackSize = tempStack.size();
+        for (int i = 0; i < tempStackSize; i++) {
+            this.commandStack.push(tempStack.pop());
+        }
+        if (current == null || !containsUri) {
+            throw new IllegalStateException("There is no command with this URI to be undone.");
+        }
+        this.undo(uri, current);
+    }
+
+    /**
+     * Undoes the command with this uri
+     * @param uri
+     * @param command
+     */
+    private void undo (URI uri, Undoable command) {
+        if (command instanceof GenericCommand) {
+            ((GenericCommand<URI>)command).undo();
+        }
+        else {
+            ((CommandSet<URI>)command).undo(uri);
+            if (!((CommandSet<URI>)command).isEmpty()) {
+                this.commandStack.push(command);
+            }
+        }
+    }
+
+    /**
+     * Retrieve all Documents whose text contains the given keyword.
+     * Documents are returned in sorted, descending order, sorted by the number of times the keyword appears in the document.
+     * Search is CASE INSENSITIVE.
+     * @param keyword
+     * @return a List of the matches. If there are no matches, return an empty list.
+     */
+    @Override
+    public List<Document> search (String keyword) {
+        if (keyword == null) {
+            throw new IllegalArgumentException("Keyword must not be null.");
+        }
+        List<Document> matches = new ArrayList<>();
+        keyword = this.stringFormatter(keyword);
+        long currentUseTime = System.nanoTime();
+        for (URI uri : trie.getAllSorted(keyword, this.createComparator(keyword))) {
+            DocumentImpl doc;
+            File file = new File(dir, (uri.getAuthority() + uri.getPath() + ".json"));
+            if (file.exists()) {
+                doc = this.storage.get(uri);
+                this.addToHeapAndUsage(doc, currentUseTime);
+            }
+            else {
+                doc = this.storage.get(uri);
+                doc.setLastUseTime(currentUseTime);
+                this.heap.reHeapify(new LUT(uri));
+            }
+            matches.add(doc);
+        }
+        return matches;
     }
 
     /**
@@ -491,6 +394,38 @@ public class DocumentStoreImpl implements DocumentStore {
             }
         };
         return comparator;
+    }
+
+    /**
+     * Retrieve all Documents whose text starts with the given prefix
+     * Documents are returned in sorted, descending order, sorted by the number of times the prefix appears in the document.
+     * Search is CASE INSENSITIVE.
+     * @param keywordPrefix
+     * @return a List of the matches. If there are no matches, return an empty list.
+     */
+    @Override
+    public List<Document> searchByPrefix (String keywordPrefix) {
+        if (keywordPrefix == null) {
+            throw new IllegalArgumentException("Keyword must not be null.");
+        }
+        List<Document> matches = new ArrayList<>();
+        keywordPrefix = this.stringFormatter(keywordPrefix);
+        long currentUseTime = System.nanoTime();
+        for (URI uri : trie.getAllWithPrefixSorted(keywordPrefix, this.createPrefixComparator(keywordPrefix))) {
+            DocumentImpl doc;
+            File file = new File(dir, (uri.getAuthority() + uri.getPath() + ".json"));
+            if (file.exists()) {
+                doc = this.storage.get(uri);
+                this.addToHeapAndUsage(doc, currentUseTime);
+            }
+            else {
+                doc = this.storage.get(uri);
+                doc.setLastUseTime(currentUseTime);
+                this.heap.reHeapify(new LUT(uri));
+            }
+            matches.add(doc);
+        }
+        return matches;
     }
 
     /**
@@ -529,7 +464,75 @@ public class DocumentStoreImpl implements DocumentStore {
         }
         return count;
     }
+    
+    /**
+     * Completely remove any trace of any Document which contains the given keyword
+     * @param keyword
+     * @return a Set of URIs of the Documents that were deleted.
+     */
+    @Override
+    public Set<URI> deleteAll (String keyword) {
+        if (keyword == null) {
+            throw new IllegalArgumentException("Keyword must not be null.");
+        }
+        keyword = this.stringFormatter(keyword);
+        Set<URI> deletions = trie.deleteAll(keyword);
+        Set<DocumentImpl> deletedDocs = new HashSet<>();
+        for (URI uri : deletions) {
+            DocumentImpl doc = this.storage.get(uri);
+            deletedDocs.add(doc);
+            this.removeFromHeapAndUsage(doc);
+            this.storage.put(uri, null);
+        }
+        this.addCommandSet(deletedDocs);
+        return deletions;
+    }
 
+    /**
+     * Completely remove any trace of any document which contains a word that has the given prefix
+     * Delete is CASE INSENSITIVE.
+     * @param keywordPrefix
+     * @return a Set of URIs of the documents that were deleted.
+     */
+    @Override
+    public Set<URI> deleteAllWithPrefix (String keywordPrefix) {
+        if (keywordPrefix == null) {
+            throw new IllegalArgumentException("Keyword must not be null.");
+        }
+        keywordPrefix = this.stringFormatter(keywordPrefix);
+        Set<URI> deletions = trie.deleteAllWithPrefix(keywordPrefix);
+        Set<DocumentImpl> deletedDocs = new HashSet<>();
+        for (URI uri : deletions) {
+            DocumentImpl doc = this.storage.get(uri);
+            deletedDocs.add(doc);
+            this.removeFromHeapAndUsage(doc);
+            this.storage.put(uri, null);
+        }
+        this.addCommandSet(deletedDocs);
+        return deletions;
+    }
+
+    /**
+     * Creates a CommandSet and pushes it onto the commandStack
+     * @param docSet documents to be added to the CommandSet
+     */
+    private void addCommandSet (Set<DocumentImpl> docSet) {
+        CommandSet<URI> commandSet = new CommandSet<>();
+        for (DocumentImpl doc : docSet) {
+            Function<URI, Boolean> function = functionUri -> {
+                this.storage.put(functionUri, doc);
+                for (String word : doc.getWords()) {
+                    this.trie.put(word, doc.getKey());
+                }
+                this.addToHeapAndUsage(doc, System.nanoTime());
+                return true;
+            };
+            GenericCommand<URI> command = new GenericCommand<>(doc.getKey(), function);
+            commandSet.addCommand(command);
+        }
+        this.commandStack.push(commandSet);
+    }
+    
     /**
      * Formats given string to the appropriate form (only letters and numbers, all same case)
      * @param string string to format
@@ -615,23 +618,6 @@ public class DocumentStoreImpl implements DocumentStore {
     }
 
     /**
-     * Updates the given Document in Heap and in Usage (documentCount/Bytes)
-     * @param doc new Document containing the values to update with
-     * @param prevDoc old Document which to update
-     * @param useTime 
-     * @return Set of URIs that were moved to disk in the process of preparing the Heap for this update
-     */
-    private LinkedHashSet<URI> updateHeapAndUsage (DocumentImpl doc, DocumentImpl prevDoc, long useTime) {
-        this.documentCount--;
-        this.documentBytes -= this.getBytes(prevDoc);
-        doc.setLastUseTime(useTime);
-        LinkedHashSet<URI> removedUris = new LinkedHashSet<>(this.prepareHeap(doc));
-        this.heap.reHeapify(new LUT(doc.getKey()));
-        this.documentCount++;
-        this.documentBytes += this.getBytes(doc);
-        return removedUris;
-    }
-    /**
      * Removes all Documents from Heap as well as Usage (documentCount/Bytes)
      * @param doc Document which will cause this method to be called
      * this method is only called when the maxDocumentCount == 0 or the Document's bytes > maxDocumentBytes
@@ -646,6 +632,24 @@ public class DocumentStoreImpl implements DocumentStore {
         while (this.documentCount > 0) {
             removedUris.add(this.moveDocumentToDisk());
         }
+        return removedUris;
+    }
+
+    /**
+     * Updates the given Document in Heap and in Usage (documentCount/Bytes)
+     * @param doc new Document containing the values to update with
+     * @param prevDoc old Document which to update
+     * @param useTime 
+     * @return Set of URIs that were moved to disk in the process of preparing the Heap for this update
+     */
+    private LinkedHashSet<URI> updateHeapAndUsage (DocumentImpl doc, DocumentImpl prevDoc, long useTime) {
+        this.documentCount--;
+        this.documentBytes -= this.getBytes(prevDoc);
+        doc.setLastUseTime(useTime);
+        LinkedHashSet<URI> removedUris = new LinkedHashSet<>(this.prepareHeap(doc));
+        this.heap.reHeapify(new LUT(doc.getKey()));
+        this.documentCount++;
+        this.documentBytes += this.getBytes(doc);
         return removedUris;
     }
 

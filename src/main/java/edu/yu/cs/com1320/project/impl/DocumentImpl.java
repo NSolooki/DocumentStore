@@ -77,19 +77,6 @@ public class DocumentImpl implements Document {
         return this.uri;
     }
 
-    @Override
-    public int hashCode () {
-        int result = uri.hashCode();
-        result = 31 * result + (txt != null ? txt.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(binaryData);
-        return result;
-    }
-
-    @Override
-    public boolean equals (Object o) {
-        return this.hashCode() == o.hashCode();
-    }
-
     /**
      * how many times does the given word appear in the document?
      * @param word
@@ -121,6 +108,37 @@ public class DocumentImpl implements Document {
     }
 
     /**
+     * (for stage 4 of project)
+     * @return the last time this document was used, via put/get or via a search result
+     */
+    @Override
+    public long getLastUseTime () {
+        return this.lastUseTime;
+    }
+
+    @Override
+    public void setLastUseTime (long timeInNanoseconds) {
+        this.lastUseTime = timeInNanoseconds;
+    }
+
+    /**
+     * @return a copy of the wordToCount map so it can be serialized
+     */
+    @Override
+    public Map<String,Integer> getWordMap () {
+        return this.wordToCount;
+    }
+
+    /**
+     * Set the wordToCount Map during deserialization
+     * @param wordMap
+     */
+    @Override
+    public void setWordMap (Map<String,Integer> wordMap) {
+        this.wordToCount = wordMap;
+    }
+
+    /**
      * @return all the words that appear in the document (with repetitions)
      */
     private List<String> getWordsList () {
@@ -146,18 +164,17 @@ public class DocumentImpl implements Document {
         return string;
     }
 
-    /**
-     * (for stage 4 of project)
-     * @return the last time this document was used, via put/get or via a search result
-     */
     @Override
-    public long getLastUseTime () {
-        return this.lastUseTime;
+    public int hashCode () {
+        int result = uri.hashCode();
+        result = 31 * result + (txt != null ? txt.hashCode() : 0);
+        result = 31 * result + Arrays.hashCode(binaryData);
+        return result;
     }
 
     @Override
-    public void setLastUseTime (long timeInNanoseconds) {
-        this.lastUseTime = timeInNanoseconds;
+    public boolean equals (Object o) {
+        return this.hashCode() == o.hashCode();
     }
 
     /**
@@ -179,22 +196,5 @@ public class DocumentImpl implements Document {
         else {
             return 0;
         }
-    }
-
-    /**
-     * @return a copy of the wordToCount map so it can be serialized
-     */
-    @Override
-    public Map<String,Integer> getWordMap () {
-        return this.wordToCount;
-    }
-
-    /**
-     * Set the wordToCount Map during deserialization
-     * @param wordMap
-     */
-    @Override
-    public void setWordMap (Map<String,Integer> wordMap) {
-        this.wordToCount = wordMap;
     }
 }
