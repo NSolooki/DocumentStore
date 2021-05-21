@@ -1,8 +1,7 @@
-#
+######
 ---
-Data Structures Semester Project, Spring 2021: Document Store and Search Engine.
+Yeshiva University Data Structures Semester Project, Spring 2021: Document Store and Search Engine.
 ---
-========================
 
 How to Use This Document
 ========================
