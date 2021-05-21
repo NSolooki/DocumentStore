@@ -2,6 +2,11 @@
 Yeshiva University Data Structures Semester Project, Spring 2021: Document Store and Search Engine.
 ===================================================================================================
 
+Preface
+=======
+This project was our semester project at Yeshiva University for Data Structures in Spring 2021.
+The project included implementing different types of data structures (including B+ Tree, Trie, and Heap) for the purpose of creating a program which can store documents, search for words in those documents, and many other features. Below is an edited copy of the README provided for the original project which outlines the specifications in much greater detail.
+
 Introduction to the Project
 ===========================
 
@@ -9,6 +14,7 @@ Over the course of the semester, you will build a very simple search
 engine. The project is split into multiple stages, each stage due at a
 different point in the semester. Each stage depends on the successful
 completion of the stages that came before it, so do not fall behind!
+
 Note: In this public version, all stages have been combined into one.
 
 In addition to the primary focus, i.e. understanding and using data
@@ -49,7 +55,8 @@ General Points About Your Code
 
 The following rules apply to all stages of the semester project:
 
-1.  **You may not use any static methods** in your code; every method must be          an instance method. You are writing object oriented code, not old-fashioned        procedural code.
+1.  **You may not use any static methods** in your code; every method must be an instance method. 
+    You are writing object oriented code, not old-fashioned procedural code.
 
 2.  **Your code may not have any** "**monster" methods;** no method in
     your code may be longer than 30 lines (not counting comments.) Get
