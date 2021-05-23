@@ -62,6 +62,7 @@ public class CommandSet<Target> extends AbstractSet<GenericCommand<Target>> impl
         int size = this.genericCommands.size();
         return this.undoAll().size() == size;
     }
+    
     /**
      * Undoes all the Commands in this CommandSet.
      * All undone Commands are removed from the CommandSet.

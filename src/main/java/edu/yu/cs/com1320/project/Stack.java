@@ -17,13 +17,11 @@ public interface Stack<T> {
     T pop ();
 
     /**
-     *
      * @return the element at the top of the stack without removing it
      */
     T peek ();
 
     /**
-     *
      * @return how many elements are currently in the stack
      */
     int size ();
