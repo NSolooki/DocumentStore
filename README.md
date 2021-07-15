@@ -75,14 +75,16 @@ In stage 1 you are building a very simple storage mechanism which supports "get"
 
 - DocumentImpl **MUST NOT** implement java.lang.Comparable
 
-- The hashCode for a Document is calculated as follows: ```
+- The hashCode for a Document is calculated as follows: 
+```
 @Override
 public int hashCode () {
     int result = uri.hashCode();
     result = 31 * result + (text != null ? text.hashCode() : 0);
     result = 31 * result + Arrays.hashCode(binaryData);
     return result;
-}```
+}
+```
 
 - DocumentImpl must override the default equals and hashCode methods. Two documents are considered equal if they have the same hashCode.
 
@@ -297,7 +299,8 @@ Every time a document is used, its last use time should be updated to the relati
 
 #### 3. Enforce Memory Limits
 
-The DocumentStore interface has 2 new methods: ```
+The DocumentStore interface has 2 new methods: 
+```
 /*
 \* set maximum number of documents that may be stored
 \* @param limit
@@ -422,12 +425,14 @@ Some details about your use of GSON:
 
   - [**How to Encode and Decode JSON Byte Array**](https://devqa.io/encode-decode-json-byte-array/) - you will need this info if your document is a byte\[\], not text
 
-Maven dependency: ```
+Maven dependency: 
+```
 <dependency>
   <groupId>com.google.code.gson</groupId>
   <artifactId>gson</artifactId>
   <version>2.8.6</version>
-</dependency>```
+</dependency>
+```
 
 ##### 3) Converting URIs to location for Serialized files
 
