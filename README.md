@@ -25,7 +25,7 @@ In addition to the primary focus, i.e. understanding and using data structures, 
 
 The following rules apply to all stages of the semester project:
 - **You may not use any static methods** in your code; every method must be an instance method. You are writing object oriented code, not old-fashioned procedural code.
-- **Your code may not have any** "**monster" methods;** no method in your code may be longer than 30 lines (not counting comments.) Get used to breaking logic down into smaller chunks, i.e. methods that you call from within another method. [with one exception in BTreeImpl]
+- **Your code may not have any** "**monster" methods**; no method in your code may be longer than 30 lines (not counting comments.) Get used to breaking logic down into smaller chunks, i.e. methods that you call from within another method. [with one exception in BTreeImpl]
 - **You must use [Maven](https://maven.apache.org/)** for building your code and for dependency declaration and resolution. Do not manually download JAR files for any opensource libraries we are using, and do not manually add them to your classpath. Only declare them as a Maven dependency, and Maven will download them for you.
 - **No other libraries: you may not use any libraries other than the JDK and whatever other libraries I explicitly specify that you should use.**
 
@@ -131,8 +131,7 @@ You will also get your first experience with functional programming in Java.
 - To undo a call to DocumentStore.deleteDocument, you must put whatever was deleted back into the DocumentStore exactly as it was before
 - **DO NOT add any new commands to the command stack in your undo logic. In other words, the undo itself is not "recorded" as a command on the command stack, rather it simply causes the undoing of some pre-existing command. Once the undo process is completely done, there is no record at all of the fact that an undo took place.**
 
-##### Functional Implementations for Undo
-
+Functional Implementations for Undo:
 - As stated above, every put and delete done on your DocumentStore must result in the adding of a new Command onto your command stack.
 - Undo must be defined as lambda functions that are passed as arguments to the Command constructor.
 - You must read Chapter 19 in "Building Java Programs" (Reges) to learn about lambdas, closures, and functions. Alternatively, you can read [Modern Java Recipes](https://www.oreilly.com/library/view/modern-java-recipes/9781491973165/). Once you learn about lambdas and closures, you should understand how to implement your undo as lambda functions.
@@ -154,7 +153,7 @@ In this stage you will add key word search capability to your document store. Th
 
 #### 1. Create a Trie Which Will Be Used for Searching Your Document Store
 
-**You must create a class** edu.yu.cs.com1320.project.impl.TrieImpl **in which you implement the** edu.yu.cs.com1302.project.Trie **interface.** An Abstract class has been provided - edu.yu.cs.com1320.project.impl.TooSimpleTrie -- which includes the Trie logic and API that we saw in class. It does NOT do all that is needed for this stage NOR is its API exactly like the one for this project; it is just an example. Do not extend TooSimpleTrie, but feel free to cut-and-paste any of its code into yours.
+**You must create a class** edu.yu.cs.com1320.project.impl.TrieImpl **in which you implement the** edu.yu.cs.com1302.project.Trie **interface**. An Abstract class has been provided - edu.yu.cs.com1320.project.impl.TooSimpleTrie -- which includes the Trie logic and API that we saw in class. It does NOT do all that is needed for this stage NOR is its API exactly like the one for this project; it is just an example. Do not extend TooSimpleTrie, but feel free to cut-and-paste any of its code into yours.
 
 #### 2. Miscellaneous Points
 
@@ -163,7 +162,7 @@ In this stage you will add key word search capability to your document store. Th
 - Document **MUST NOT** implement java.lang.Comparable
 - TrieImpl **must** use a java.util.Comparator\<Document\> to sort collections of documents by how many times a given word appears in them, when implementing Trie.getAllSorted and any other Trie methods that return a sorted collection.
 - TrieImpl **must** have a constructor that takes no arguments
-- Any search method in TrieImpl or DocumentStoreImpl that returns a collection **must** return an empty collection, **not** **null**, if there are no matches.
+- Any search method in TrieImpl or DocumentStoreImpl that returns a collection **must** return an empty collection, **not null**, if there are no matches.
 
 #### 3. When a Document is Added to the DocumentStore
 
@@ -260,7 +259,7 @@ See the interfaces supplied to you and their comments for details:
 
 ### Description
 
-In stage \#4 a document that had to be removed from memory due to memory limits was simply erased from existence. In this stage, we will write it to disk and bring it back into memory if it is needed. You will continue to use a MinHeap to track the usage of documents in the document store, and you will continue to use the Trie for keyword search. HashTableImpl, however, is completely removed from your system, and replaced with a BTree for storing your documents. While the BTree itself will stay in memory, the documents it stores can move back and forth between disk and memory, as dictated by memory usage limits.
+In stage 4 a document that had to be removed from memory due to memory limits was simply erased from existence. In this stage, we will write it to disk and bring it back into memory if it is needed. You will continue to use a MinHeap to track the usage of documents in the document store, and you will continue to use the Trie for keyword search. HashTableImpl, however, is completely removed from your system, and replaced with a BTree for storing your documents. While the BTree itself will stay in memory, the documents it stores can move back and forth between disk and memory, as dictated by memory usage limits.
 
 ### Logic Requirements
 
@@ -276,7 +275,7 @@ An entry in the BTree can have 3 different things as its Value:
 
 #### 2. Memory Management
 
-You will continue to track memory usage against limits, and when a limit is exceeded you will use your MinHeap to identify the least recently used doc, as you did in stage \#4. **HOWEVER**:
+You will continue to track memory usage against limits, and when a limit is exceeded you will use your MinHeap to identify the least recently used doc, as you did in stage 4. **HOWEVER**:
 - When a document has to be kicked out of memory, instead of it being deleted completely it will be written to disk via a call to BTree.moveToDisk. When a document is moved to disk, the entry in the BTree has a reference to the file on disk as its value instead of a reference to the document in memory. When a document is written out to disk, it is removed from the MinHeap which is managing memory.
 - No data structure in your document store other than the BTree should have a direct reference to the Document object. Other data structures should only have the document URI, and call BTree.get whenever they need any piece of information from the document, e.g. it's lastUseTime, its byte\[\], etc.
   - Even though this means the MinHeap will have to call the BTree every time it wants to compare the lastUseTime of two documents, and this is very inefficient, we neither want to complicate this project more by dealing with mechanisms to synch the two, nor do we want to allow the MinHeap to directly reference document objects, so we will just accept this inefficiency.
@@ -290,16 +289,17 @@ You will continue to track memory usage against limits, and when a limit is exce
 ##### a) What to Serialize
 
 You do not serialize the lastUseTime.\
+
 You must serialize/deserialize:
 - the contents of the document (String or binary)
 - the URI
 - the wordcount map.
 
 **The following has been added to the Document interface:**
-- **Map\<String,Integer\> getWordMap();\
-  This must return a copy of the wordcount map so it can be serialized**
-- **void setWordMap(Map\<String,Integer\> wordMap);**\
-  **This must set the wordcount map during deserialization**
+- Map\<String,Integer\> getWordMap();\
+  This must return a copy of the wordcount map so it can be serialized
+- void setWordMap(Map\<String,Integer\> wordMap);\
+  This must set the wordcount map during deserialization
 
 ##### b) Document (De)Serialization
 
@@ -314,8 +314,8 @@ Some details about your use of GSON:
 - You must write a custom JsonDeserializer /JsonSerializer for Documents
 - You must add the maven dependencies for GSON to your pom.xml file.
 - **VERY IMPORTANT LINKS FOR YOU REGARDING HOW TO (DE)SERIALIZE YOUR DOCUMENTS:**
-  - [**GSON user's guide**](https://github.com/google/gson/blob/master/UserGuide.md)
-  - [**How to Encode and Decode JSON Byte Array**](https://devqa.io/encode-decode-json-byte-array/) - you will need this info if your document is a byte\[\], not text
+  - [GSON user's guide](https://github.com/google/gson/blob/master/UserGuide.md)
+  - [How to Encode and Decode JSON Byte Array](https://devqa.io/encode-decode-json-byte-array/) - you will need this info if your document is a byte\[\], not text
 
 Maven dependency:
   ```
