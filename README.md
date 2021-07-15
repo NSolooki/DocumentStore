@@ -335,7 +335,7 @@ See the interfaces supplied to you and their comments for details
 
 - DocumentStore.setMaxDocumentBytes(limit)
 
-## Stage 5: Memory Management, Part 2: Two Tier Storage (RAM and Disk) Using a Btree
+## Stage 5: Memory Management, Part 2: Two Tier Storage (RAM and Disk) Using a BTree
 
 **Due: Tuesday, May 11, 6:00PM, ET.**
 
@@ -379,7 +379,7 @@ You will continue to track memory usage against limits, and when a limit is exce
 
 #### 3. Document Serialization and Deserialization
 
-##### 1) What to Serialize
+##### a) What to Serialize
 
 You do not serialize the lastUseTime.\
 You must serialize/deserialize:
@@ -392,14 +392,13 @@ You must serialize/deserialize:
 
 **The following has been added to the Document interface:**
 
-**Map\<String,Integer\> getWordMap();\
+- **Map\<String,Integer\> getWordMap();\
 This must return a copy of the wordcount map so it can be serialized**
 
-**\
-void setWordMap(Map\<String,Integer\> wordMap);**
+- **void setWordMap(Map\<String,Integer\> wordMap);**\
 **This must set the wordcount map during deserialization**
 
-##### 2) Document (De)Serialization
+##### b) Document (De)Serialization
 
 - BTreeImpl MUST NOT implement (de)serialization itself. When DocumentStoreImpl is initialing itself, it must call BTreeImpl.setPersistenceManager and pass it an instance of edu.yu.cs.com1320.project.stage5.impl.DocumentPersistenceManager which will do all the disk I/O for the BTree. BTreeImpl uses the DocumentPersistenceManager for [all]{.underline} disk I/O.
 
@@ -434,7 +433,7 @@ Maven dependency:
   </dependency>
   ```
 
-##### 3) Converting URIs to location for Serialized files
+##### c) Converting URIs to location for Serialized files
 
 Let's assume the user gives your doc a URI of "http://www.yu.edu/documents/doc1". The JSON file for that document
 should be stored under \[base directory\]/www.yu.edu/documents/doc1.json. In other words, remove the "http://", and then convert the remaining path of the URI to a file path under your base directory. Each path segment represents a directory, and the namepart of the URI represents the name of your file. You must add ".json" to the end of the file name.
