@@ -17,7 +17,7 @@ In addition to the primary focus, i.e. understanding and using data structures, 
 - Implement a general-purpose class and then using it for a specific application. This is a small step from a code perspective, but a giant leap in terms of how you design your code. This is you first foray into [modular design](https://en.wikipedia.org/wiki/Modular_programming).
 - Experience with, and competency in, professional software engineering skills and tools:
   - Create your first [Maven](https://maven.apache.org/) project for building your system and for dependency management. Large real-world software is built using build systems, not manually invoking javac at the command line.
-- Reuse an open source project -- details to come as part of your project.
+- Reuse an open-source project -- details to come as part of your project.
 - Build your first real piece of software - a search engine.
 - Teach yourself, and use, more advanced features of the Java language.
 
@@ -26,7 +26,7 @@ In addition to the primary focus, i.e. understanding and using data structures, 
 The following rules apply to all stages of the semester project:
 - **You may not use any static methods** in your code; every method must be an instance method. You are writing object oriented code, not old-fashioned procedural code.
 - **Your code may not have any** "**monster" methods**; no method in your code may be longer than 30 lines (not counting comments.) Get used to breaking logic down into smaller chunks, i.e. methods that you call from within another method. [with one exception in BTreeImpl]
-- **You must use [Maven](https://maven.apache.org/)** for building your code and for dependency declaration and resolution. Do not manually download JAR files for any opensource libraries we are using, and do not manually add them to your classpath. Only declare them as a Maven dependency, and Maven will download them for you.
+- **You must use [Maven](https://maven.apache.org/)** for building your code and for dependency declaration and resolution. Do not manually download JAR files for any open-source libraries we are using, and do not manually add them to your classpath. Only declare them as a Maven dependency, and Maven will download them for you.
 - **No other libraries: you may not use any libraries other than the JDK and whatever other libraries I explicitly specify that you should use.**
 
 ## **STAGES**
@@ -88,11 +88,11 @@ In stage 1 you are building a very simple storage mechanism which supports "get"
 #### 4. Other requirements on your implementation
 
 - You must fully implement the interfaces defined in the code provided to you under the stage1 folder. Other than constructors, you may not add any public or protected methods in your implementations of these interfaces. **Any additional methods you add must be private.**
-- The name of your implementation classes should be the name of the interface with "Impl" (short for "implementation") added to the end, and be located in a sub-package called "impl". That means that you must, at a minimum, submit the following classes in your solution:
+- The name of your implementation classes should be the name of the interface with "Impl" (short for "implementation") added to the end and be located in a sub-package called "impl". That means that you must, at a minimum, submit the following classes in your solution:
   - edu.yu.cs.com1320.project.stage1.impl.DocumentImpl
   - edu.yu.cs.com1320.project.stage1.impl.DocumentStoreImpl
   - edu.yu.cs.com1320.project.impl.HashTableImpl
-- Make sure the name of your **i**mpl **package** starts with a lower case "i", not an upper case "I". The "I" in your class names, on theother hand, e.g. Document**I**mpl, must be upper case.
+- Make sure the name of your **i**mpl **package** starts with a lower case "i", not an upper case "I". The "I" in your class names, on the other hand, e.g. Document**I**mpl, must be upper case.
 - DO NOT move the interfaces to a different package -- they must remain in the packages in which they were placed in the code you are given.
 - HashTable**I**mpl and DocumentStore**I**mpl must both have no-argument constructors.
 
@@ -109,8 +109,8 @@ You will also get your first experience with functional programming in Java.
 
 #### 1. Update HashTableImpl
 
-  - Implement array doubling on the array used in your HashTableImpl to support unlimited entries. Don't forget to re-hash all your entries after doubling the array!
-  - Add a no-arguments constructor to HashTableImpl if you didn't already have one.
+  - Implement array doubling on the array used in your HashTableImpl to support unlimited entries. Do not forget to re-hash all your entries after doubling the array!
+  - Add a no-arguments constructor to HashTableImpl if you did not already have one.
 
 #### 2. Add Undo Support via a Command Stack
 
@@ -120,7 +120,7 @@ You will also get your first experience with functional programming in Java.
   - You must write a class called edu.yu.cs.com1320.project.impl.StackImpl which is found in its own .java file and implements the interface provided to you called edu.yu.cs.com1320.project.Stack, and your command stack must be an instance of StackImpl.
   - StackImpl must have a constructor that takes no arguments.
 - If a user calls DocumentStore.undo(), then your DocumentStore must undo the last command on the stack
-- If a user calls DocumentStore.undo(URI),then your DocumentStore must undo the last command on the stack that was done on the Document whose key is the given URI, without having any **permanent** effects on any commands that are on top of it in the command stack.
+- If a user calls DocumentStore.undo(URI), then your DocumentStore must undo the last command on the stack that was done on the Document whose key is the given URI, without having any **permanent** effects on any commands that are on top of it in the command stack.
 - Undo must be achieved by DocumentStore calling the Command.undo method on the Command that represents the action to be undone. DocumentStore **may not** implement the actual undo logic itself, although it must manage the command stack and determine which undo to call on which Command.
 
 ##### Undo Logic
@@ -206,8 +206,7 @@ In this stage you will use a **min** Heap to track the usage of documents in the
 
 #### 1. Queue Documents by Usage Time via a MinHeap
 
-You are given an abstract class called edu.yu.cs.com1320.project.MinHeap. You must extend and complete this
-abstract class as a new class called edu.yu.cs.com1320.project.impl.MinHeapImpl. After a Document is used and its lastUsedTime is updated, that Document may now be in the wrong place in the Heap, therefore you must call MinHeapImpl.reHeapify. The job of reHeapify is to determine whether the Document whose time was updated should stay where it is, move up in the heap, or move down in the heap, and then carry out any move that should occur.
+You are given an abstract class called edu.yu.cs.com1320.project.MinHeap. You must extend and complete this abstract class as a new class called edu.yu.cs.com1320.project.impl.MinHeapImpl. After a Document is used and its lastUsedTime is updated, that Document may now be in the wrong place in the Heap, therefore you must call MinHeapImpl.reHeapify. The job of reHeapify is to determine whether the Document whose time was updated should stay where it is, move up in the heap, or move down in the heap, and then carry out any move that should occur.
 
 MinHeapImpl must have a constructor that takes no arguments. Document must now extend Comparable\<Document\>, and the comparison must be made based on the last use time (see next point) of each document.
 
@@ -239,7 +238,7 @@ The DocumentStore interface has 2 new methods:
 
 When your program first starts, there are no memory limits. However, the user may call either (or both) of the methods shown above on your DocumentStore to set limits on the storage used by documents. If both setters have been called by the user, then memory is considered to be full if **either** limit is reached.
 
-**For purposes of this project, the memory usage of a document defined as the total number of bytes in the document's in-memory representation. For text, that's the length of the array returned by [String.getBytes()](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html#getBytes()), and for a binary document it is the length of the binary data, i.e. the byte\[\].**
+**For purposes of this project, the memory usage of a document defined as the total number of bytes in the document's in-memory representation. For text, that is the length of the array returned by [String.getBytes()](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html#getBytes()), and for a binary document it is the length of the binary data, i.e. the byte\[\].**
 
 When carrying out a "put" or an "undo" will push the DocumentStore above either memory limit, the document store must get the least recently used Document from the MinHeap, and then erase **all traces** of that document from the DocumentStore; it should no longer exist in the Trie, in any Undo commands, or anywhere else in memory. This must be done for as many least-recently-used documents as necessary until there is enough memory below the limit to carry out the "put" or "undo".
 
@@ -275,7 +274,7 @@ An entry in the BTree can have 3 different things as its Value:
 
 #### 2. Memory Management
 
-You will continue to track memory usage against limits, and when a limit is exceeded you will use your MinHeap to identify the least recently used doc, as you did in stage 4. **HOWEVER**:
+You will continue to track memory usage against limits, and when a limit is exceeded, you will use your MinHeap to identify the least recently used doc, as you did in stage 4. **HOWEVER**:
 - When a document has to be kicked out of memory, instead of it being deleted completely it will be written to disk via a call to BTree.moveToDisk. When a document is moved to disk, the entry in the BTree has a reference to the file on disk as its value instead of a reference to the document in memory. When a document is written out to disk, it is removed from the MinHeap which is managing memory.
 - No data structure in your document store other than the BTree should have a direct reference to the Document object. Other data structures should only have the document URI, and call BTree.get whenever they need any piece of information from the document, e.g. it's lastUseTime, its byte\[\], etc.
   - Even though this means the MinHeap will have to call the BTree every time it wants to compare the lastUseTime of two documents, and this is very inefficient, we neither want to complicate this project more by dealing with mechanisms to synch the two, nor do we want to allow the MinHeap to directly reference document objects, so we will just accept this inefficiency.
@@ -303,7 +302,7 @@ You must serialize/deserialize:
 
 ##### b) Document (De)Serialization
 
-- BTreeImpl MUST NOT implement (de)serialization itself. When DocumentStoreImpl is initialing itself, it must call BTreeImpl.setPersistenceManager and pass it an instance of edu.yu.cs.com1320.project.stage5.impl.DocumentPersistenceManager which will do all the disk I/O for the BTree. BTreeImpl uses the DocumentPersistenceManager for [all]{.underline} disk I/O.
+- BTreeImpl MUST NOT implement (de)serialization itself. When DocumentStoreImpl is initialing itself, it must call BTreeImpl.setPersistenceManager and pass it an instance of edu.yu.cs.com1320.project.stage5.impl.DocumentPersistenceManager which will do all the disk I/O for the BTree. BTreeImpl uses the DocumentPersistenceManager for **all** disk I/O.
 - You must complete the DocumentPersistenceManager class, whose skeleton has been given to you.
 - By default, your DocumentPersistenceManager will serialize/deserialize to/from the working directory of your application (see user.dir property [here](https://docs.oracle.com/javase/tutorial/essential/environment/sysprop.html).) However, if the caller passes in a non-null baseDir as a constructor argument when creating the DocumentPersistenceManager, then all serialization/deserialization occurs from that directory instead.
 - DocumentPersistenceManager should use instances of com.google.gson.JsonSerializer\<Document\> and com.google.gson.JsonDeserializer\<Document\> to (de)serialize from/to disk.
