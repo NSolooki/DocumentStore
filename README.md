@@ -75,16 +75,16 @@ In stage 1 you are building a very simple storage mechanism which supports "get"
 
 - DocumentImpl **MUST NOT** implement java.lang.Comparable
 
-- The hashCode for a Document is calculated as follows: 
-```
-@Override
-public int hashCode () {
-    int result = uri.hashCode();
-    result = 31 * result + (text != null ? text.hashCode() : 0);
-    result = 31 * result + Arrays.hashCode(binaryData);
-    return result;
-}
-```
+- The hashCode for a Document is calculated as follows:
+  ```
+  @Override
+  public int hashCode () {
+      int result = uri.hashCode();
+      result = 31 * result + (text != null ? text.hashCode() : 0);
+      result = 31 * result + Arrays.hashCode(binaryData);
+      return result;
+  }
+  ```
 
 - DocumentImpl must override the default equals and hashCode methods. Two documents are considered equal if they have the same hashCode.
 
@@ -300,20 +300,20 @@ Every time a document is used, its last use time should be updated to the relati
 #### 3. Enforce Memory Limits
 
 The DocumentStore interface has 2 new methods: 
-```
-/*
-\* set maximum number of documents that may be stored
-\* @param limit
-*/
-void setMaxDocumentCount(int limit);
-```
-```
-/**
-* set maximum number of bytes of memory that may be used by all the documents in memory combined
-* @param limit
-*/
-void setMaxDocumentBytes(int limit);
-```
+  ```
+  /**
+  * set maximum number of documents that may be stored
+  * @param limit
+  */
+  void setMaxDocumentCount(int limit);
+  ```
+  ```
+  /**
+  * set maximum number of bytes of memory that may be used by all the documents in memory combined
+  * @param limit
+  */
+  void setMaxDocumentBytes(int limit);
+  ```
 
 When your program first starts, there are no memory limits. However, the user may call either (or both) of the methods shown above on your DocumentStore to set limits on the storage used by documents. If both setters have been called by the user, then memory is considered to be full if **either** limit is reached.
 
@@ -425,14 +425,14 @@ Some details about your use of GSON:
 
   - [**How to Encode and Decode JSON Byte Array**](https://devqa.io/encode-decode-json-byte-array/) - you will need this info if your document is a byte\[\], not text
 
-Maven dependency: 
-```
-<dependency>
-  <groupId>com.google.code.gson</groupId>
-  <artifactId>gson</artifactId>
-  <version>2.8.6</version>
-</dependency>
-```
+Maven dependency:
+  ```
+  <dependency>
+    <groupId>com.google.code.gson</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.8.6</version>
+  </dependency>
+  ```
 
 ##### 3) Converting URIs to location for Serialized files
 
