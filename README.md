@@ -415,13 +415,9 @@ This must return a copy of the wordcount map so it can be serialized**
 Some details about your use of GSON:
 
 - You must write a custom JsonDeserializer /JsonSerializer for Documents
-
 - You must add the maven dependencies for GSON to your pom.xml file.
-
 - **VERY IMPORTANT LINKS FOR YOU REGARDING HOW TO (DE)SERIALIZE YOUR DOCUMENTS:**
-
   - [**GSON user's guide**](https://github.com/google/gson/blob/master/UserGuide.md)
-
   - [**How to Encode and Decode JSON Byte Array**](https://devqa.io/encode-decode-json-byte-array/) - you will need this info if your document is a byte\[\], not text
 
 Maven dependency:
